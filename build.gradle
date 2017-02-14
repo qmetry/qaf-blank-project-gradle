@@ -1,0 +1,95 @@
+import java.text.SimpleDateFormat
+import java.util.Date
+
+apply plugin: 'java'
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+
+def getCurrentTimestamp ()
+{
+  Date today = new Date ()
+  SimpleDateFormat df = new SimpleDateFormat ("dd_MMM_yyyy_hh_mm_aa")
+  return df.format (today)
+}
+
+ext{
+
+	//set true to enable to compile using aspectj
+	compileUsingAspect = false
+	
+    testResultsDir = 'test-results'
+    runTime = getCurrentTimestamp()
+	resultOutputDir = String.valueOf(testResultsDir)+'/'+runTime
+	
+	// set suiteFile, default is 'config/testrun_config.xml'
+    if (!project.hasProperty('suiteFile')) {
+        suiteFile = 'config/testrun_config.xml'
+    }
+}
+
+//Add repository here
+repositories {
+    jcenter()
+    maven {
+            url "https://qmetry.github.io/qaf/dist/"
+    }
+}
+
+//Add dependencies here
+dependencies {
+    compile 'com.qmetry:qaf:2.1.10'
+    compile 'com.qmetry:qaf-support:2.1.10'
+}
+
+
+//for compilation using aspectj
+if(compileUsingAspect){
+	compileTestJava.deleteAllActions()
+	compileTestJava << {
+		
+		ant.taskdef(
+			resource: 'org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties',
+			classpath: configurations.testCompile.asPath )
+		
+		ant.iajc(
+				source: sourceCompatibility,
+				target: targetCompatibility,
+				destDir: sourceSets.test.output.classesDir.absolutePath,
+				fork: 'true',
+				sourceRootCopyFilter: '**/*.java,**/*.aj',
+				aspectpath: configurations.testCompile.asPath ) 
+		
+		{
+			sourceroots {
+				sourceSets.test.java.srcDirs.each { 
+					dir -> pathelement(location: dir.absolutePath)
+				}
+			}
+		}
+	}
+}
+
+//run test
+test{
+	useTestNG(){
+		useDefaultListeners = true
+		outputDirectory file(resultOutputDir)
+		suites suiteFile
+
+		//System properties for report
+		systemProperty 'org.uncommons.reportng.xml-dialect','testng'
+		systemProperty 'org.uncommons.reportng.escape-output',false
+		systemProperty 'log4j.configuration','file:///'+projectDir+'/resources/log4j.properties'
+		systemProperty 'json.report.root.dir',testResultsDir
+		systemProperty 'outputDir',resultOutputDir
+		systemProperty 'test.results.dir',resultOutputDir+'/html'
+		systemProperty 'json.report.dir',resultOutputDir+'/json'
+		systemProperty 'selenium.screenshots.dir',resultOutputDir+'/img'
+		systemProperty 'selenium.screenshots.relative.path','../img' 
+	}
+	testLogging{
+		showStandardStreams = true
+		exceptionFormat = 'full'
+	}
+}
