@@ -3,7 +3,7 @@
 This is automation project skeleton to start with using Gradle. Please refer [documentaion](https://qmetry.github.io/qaf/) for more help.
 
 
-This is sample project with Maven directory structure:
+This is sample project with Gradle directory structure:
  
 The 'config' directory contains testng.xml file, and is a place holder for configuration files.
 
@@ -24,5 +24,6 @@ Note: This sample project uses chrome driver and it requires chrome driver binar
 You need to download and set webdriver.chrome.driver property in application.properties file with driver binary path.
 
 Please refer https://qmetry.github.io/qaf/ 
+
 Thanks,
 QAS Team.

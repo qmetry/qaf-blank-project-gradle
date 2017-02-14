@@ -87,6 +87,7 @@ test{
 		systemProperty 'json.report.dir',resultOutputDir+'/json'
 		systemProperty 'selenium.screenshots.dir',resultOutputDir+'/img'
 		systemProperty 'selenium.screenshots.relative.path','../img' 
+		systemProperties System.properties
 	}
 	testLogging{
 		showStandardStreams = true
